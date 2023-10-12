@@ -1,0 +1,6 @@
+.loadingBox {
+  @apply min-h-screen flex justify-center items-center;
+  .textCss {
+    @apply text-lg text-black;
+  }
+}
