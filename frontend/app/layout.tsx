@@ -10,13 +10,19 @@ import {
 
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import UserRoleContext from "@/store/user-role";
 
 type FieldType = {
   name?: string;
   password?: string;
   role?: string;
+};
+
+type resType = {
+  code: number;
+  message: string;
+  data: string;
 };
 
 export default function RootLayout({
@@ -27,6 +33,36 @@ export default function RootLayout({
   const [current, setCurrent] = useState("AllData");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleData, setRoleData] = useState("");
+
+  const [form] = Form.useForm();
+
+  async function registerFunc() {
+    let name = form.getFieldValue("name");
+    let password = form.getFieldValue("password");
+    let role = form.getFieldValue("role");
+    if (!name || !password || !role) {
+      return Modal.warning({
+        title: 'warning',
+        content: 'Please check required fields',
+      });
+    }
+    let res = await fetch('https://b968-148-251-210-181.ngrok.io' + "/user/add", {
+      method: "POST",
+      body: JSON.stringify({ name, password, role }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    let dealRes: resType = await res.json();
+    console.log("res2", dealRes);
+    if (dealRes.code === 1) {
+      setRoleData(dealRes.data);
+      setIsModalOpen(false);
+      message.success(dealRes.message);
+    } else {
+      message.error(dealRes.message);
+    }
+  }
 
   const items: MenuProps["items"] = [
     {
@@ -56,7 +92,7 @@ export default function RootLayout({
     console.log("Success:", values);
     const { name, password, role } = values;
     let res: any = await fetch(
-      process.env.NEXT_PUBLIC_API_URL +
+      'https://b968-148-251-210-181.ngrok.io' +
         `/user/list?name=${name}&password=${password}&role=${role}`
     );
     res = await res.json();
@@ -72,6 +108,7 @@ export default function RootLayout({
   const onFinishFailed = (errorInfo: any) => {
     console.log("Failed:", errorInfo);
   };
+
   const router = useRouter();
   const onClick: MenuProps["onClick"] = (e) => {
     console.log("click ", e);
@@ -118,6 +155,7 @@ export default function RootLayout({
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
               autoComplete="off"
+              form={form}
             >
               <Form.Item<FieldType>
                 label="name"
@@ -155,6 +193,9 @@ export default function RootLayout({
               <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                 <Button type="primary" htmlType="submit">
                   login
+                </Button>
+                <Button className="ml-5" onClick={registerFunc}>
+                  register
                 </Button>
               </Form.Item>
             </Form>

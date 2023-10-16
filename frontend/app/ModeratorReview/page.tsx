@@ -1,16 +1,17 @@
 "use client";
 import { useEffect, useState, useContext } from "react";
-import { approveMatch } from "@/until/action";
+import { approveMatch, averageScoreFunc } from "@/until/action";
 import { useRouter } from "next/navigation";
 import style from "./page.module.scss";
 
-import { Button, Form, Input, message, Table, Select } from "antd";
+import { Button, Form, Input, message, Table, Select, Modal, Rate, DatePicker  } from "antd";
 import {
   onFinish,
   onFinishFailed,
   approveFunc,
   rejectFunc,
   deleteFunc,
+  modifyRate,
 } from "./until";
 
 import UserRoleContext from "@/store/user-role";
@@ -19,7 +20,12 @@ type FieldType = {
   title?: string;
   authors?: string;
   approval?: number;
+  SE?: string;
+  yearOfPublication?: string;
+  averageScore?: number;
 };
+
+const desc = ["terrible", "bad", "normal", "good", "wonderful"];
 
 export default function Home(props: any) {
   const useCtx = useContext(UserRoleContext);
@@ -28,8 +34,50 @@ export default function Home(props: any) {
   const { isAll } = props;
   const [paperList, setPaperList] = useState([]);
   const [fresh, setFresh] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentId, setCurrentId] = useState("");
+  const [rateValue, setRateValue] = useState(3);
+  // const [searchForm, setSearchForm] = useState({});
+
+  const initialValues = {
+    title: "",
+    authors: "",
+    yearOfPublication: "",
+    SE: "",
+    averageScore: "",
+    approval: "",
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+    modifyRate({ id: currentId, rate: rateValue, setFresh, fresh });
+  };
+
+  const onChange = (pagination: any, filters: any, sorter: any, extra: any) => {
+    console.log("params", pagination, filters, sorter, extra);
+    // console.log("searchForm", searchForm);
+    let searchFormStorage: any = {};
+    for (let key in initialValues) {
+      searchFormStorage[key] = localStorage.getItem(key);
+    }
+    getPaperList({
+      ...searchFormStorage,
+      sortBy: sorter.field,
+      order: sorter.order,
+    });
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const [form] = Form.useForm();
+
+  function rateFunc(params: any) {
+    console.log("rateFunc", params);
+    setCurrentId(params.record.id);
+    setIsModalOpen(true);
+  }
 
   const columns = [
     {
@@ -53,41 +101,61 @@ export default function Home(props: any) {
       title: "authors",
       dataIndex: "authors",
       key: "authors",
+      sorter: (a: any, b: any) => a.authors - b.authors,
     },
     {
       title: "journal name",
       dataIndex: "journalName",
       key: "journalName",
+      sorter: (a: any, b: any) => a.journalName - b.journalName,
     },
     {
       title: "year of publication",
       dataIndex: "yearOfPublication",
       key: "yearOfPublication",
+      sorter: (a: any, b: any) => a.yearOfPublication - b.yearOfPublication,
+    },
+    {
+      title: "SE",
+      dataIndex: "SE",
+      key: "SE",
+      sorter: (a: any, b: any) => a.SE - b.SE,
+    },
+    {
+      title: "average score",
+      dataIndex: "averageScore",
+      key: "averageScore",
+      sorter: (a: any, b: any) => a.averageScore - b.averageScore,
     },
     {
       title: "volume",
       dataIndex: "volume",
       key: "volume",
+      sorter: (a: any, b: any) => a.volume - b.volume,
     },
     {
       title: "number",
       dataIndex: "number",
       key: "number",
+      sorter: (a: any, b: any) => a.number - b.number,
     },
     {
       title: "pages",
       dataIndex: "pages",
       key: "pages",
+      sorter: (a: any, b: any) => a.pages - b.pages,
     },
     {
       title: "DOI",
       dataIndex: "DOI",
       key: "DOI",
+      sorter: (a: any, b: any) => a.DOI - b.DOI,
     },
     {
       title: "approval",
       dataIndex: "approval",
       key: "approval",
+      sorter: (a: any, b: any) => a.approval - b.approval,
     },
     {
       title: "Action",
@@ -99,6 +167,7 @@ export default function Home(props: any) {
         let showEdit = useCtx.roleData === "3" || useCtx.roleData === "2";
         return (
           <span className={style.actionBox}>
+            <a onClick={() => rateFunc(params)}>rate</a>
             {showReview && (
               <>
                 <a onClick={() => approveFunc(params)}>approve</a>
@@ -115,27 +184,38 @@ export default function Home(props: any) {
     },
   ];
 
-  if (isAll) {
-    columns.pop();
-  }
+  // if (isAll) {
+  //   columns.pop();
+  // }
 
   const onReset = () => {
     form.resetFields();
+    for (let key in initialValues) {
+      localStorage.setItem(key, "");
+    }
     setFresh(!fresh);
   };
 
   async function getPaperList(params: any) {
+
     let paramsStr = "";
     if (params !== "all") {
+      if (params.approval === 'all') {        
+        delete params.approval
+      }
+      // let searchForm: any = {};
       for (let key in params) {
         if (params[key]) {
+          // searchForm[key] = params[key];
           paramsStr = paramsStr + "&" + key + "=" + params[key];
+          localStorage.setItem(key, params[key]);
         }
       }
+      // setSearchForm({ ...searchForm });
       paramsStr = paramsStr.replace("&", "");
     }
-
-    let url = process.env.NEXT_PUBLIC_API_URL + `/paper/list`;
+    console.log(paramsStr)
+    let url = 'https://b968-148-251-210-181.ngrok.io' + `/paper/list`;
     if (paramsStr) url = url + "?" + paramsStr;
     let res = await fetch(url, {
       cache: "no-store",
@@ -159,29 +239,41 @@ export default function Home(props: any) {
         id: item["_id"],
         journalName: item.journalName,
         yearOfPublication: item.yearOfPublication,
+        SE: item.SE,
         volume: item.volume,
         number: item.number,
         pages: item.pages,
         DOI: item.DOI,
         approval: approveMatch(item.approval),
+        averageScore: averageScoreFunc(item.ratePersonNum, item.rateTotal),
       };
       list.push(itemObj);
     });
 
     setPaperList(list);
   }
+  function initSearchForm() {
+    let params: any = {};
+    for (let key in initialValues) {
+      form.setFieldValue(key, localStorage.getItem(key));
+      params[key] = localStorage.getItem(key);
+    }
+    getPaperList(params);
+  }
   useEffect(() => {
     getPaperList("all");
   }, [fresh]);
+  useEffect(() => {
+    initSearchForm();
+  }, []);
   return (
     <main>
       <Form
         name="basic"
-        initialValues={{ remember: true }}
         onFinish={(values) => onFinish(values, getPaperList)}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
-        className="flex my-6"
+        className="flex flex-wrap my-6"
         form={form}
       >
         <Form.Item<FieldType>
@@ -199,12 +291,36 @@ export default function Home(props: any) {
           <Input />
         </Form.Item>
         <Form.Item
+          label="Year of Publication Range"
+          name="yearOfPublicationRange"
+          rules={[{ required: true, message: "Please select the year range of publication!" }]}
+        >
+          <DatePicker.RangePicker
+            picker="year"
+            format="YYYY"
+          />
+        </Form.Item>
+        <Form.Item<FieldType>
+          label="SE"
+          name="SE"
+          rules={[{ message: "Please input your SE!" }]}
+        >
+          <Input />
+        </Form.Item>
+        {/* <Form.Item<FieldType>
+          label="average score"
+          name="averageScore"
+          rules={[{ message: "Please input your average score!" }]}
+        >
+          <Input />
+        </Form.Item> */}
+        <Form.Item
           className={style.selectApproval}
           label="approval"
           name="approval"
         >
           <Select defaultValue="">
-            <Select.Option value={""}>All</Select.Option>
+            <Select.Option value={null}>All</Select.Option>
             <Select.Option value={0}>Pending Review</Select.Option>
             <Select.Option value={1}>Approved</Select.Option>
             <Select.Option value={2}>Rejected</Select.Option>
@@ -225,7 +341,23 @@ export default function Home(props: any) {
         dataSource={paperList}
         rowKey={(record: any) => record.id}
         pagination={false}
+        onChange={onChange}
       />
+      <Modal
+        title="rate"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <span className="flex justify-center">
+          <Rate tooltips={desc} onChange={setRateValue} value={rateValue} />
+          {rateValue ? (
+            <span className="ant-rate-text">{desc[rateValue - 1]}</span>
+          ) : (
+            ""
+          )}
+        </span>
+      </Modal>
     </main>
   );
 }

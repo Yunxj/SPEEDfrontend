@@ -8,3 +8,8 @@ export function approveMatch(style: number) {
       return "rejected";
   }
 }
+export function averageScoreFunc(num: any, rate: any) {
+  let returnData = rate / num;
+  console.log("returnData", returnData);
+  return isNaN(returnData) ? "" : returnData.toFixed(1);
+}

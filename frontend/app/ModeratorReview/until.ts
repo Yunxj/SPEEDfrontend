@@ -1,6 +1,11 @@
 import { Button, Form, Input, message, Table } from "antd";
 export const onFinish = async (values: any, getPaperList: any) => {
   console.log("Success:", values);
+  if (values.yearOfPublicationRange) {
+    values.startYear = values.yearOfPublicationRange[0].$y
+    values.endYear = values.yearOfPublicationRange[1].$y
+    delete values.yearOfPublicationRange
+  }
   getPaperList(values);
 };
 
@@ -8,10 +13,30 @@ export const onFinishFailed = (errorInfo: any) => {
   console.log("Failed:", errorInfo);
 };
 
+export async function modifyRate(params: any) {
+  const { id, rate, setFresh, fresh } = params;
+  let data = { id, rate };
+  let res: any = await fetch('https://b968-148-251-210-181.ngrok.io' + `/paper/edit`, {
+    method: "put",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  res = await res.json();
+  console.log("res", res);
+  if (res.code === 1) {
+    message.success(res.message);
+    // form.resetFields();
+    setFresh(!fresh);
+  } else {
+    message.error(res.message);
+  }
+}
 export async function modifyApprove(params: any) {
   const { id, approval, setFresh, fresh, form } = params;
   let data = { id, approval };
-  let res: any = await fetch(process.env.NEXT_PUBLIC_API_URL + `/paper/edit`, {
+  let res: any = await fetch('https://b968-148-251-210-181.ngrok.io' + `/paper/edit`, {
     method: "put",
     body: JSON.stringify(data),
     headers: {
@@ -45,7 +70,7 @@ export async function deleteFunc(paramsAll: any) {
   const { record, setFresh, fresh, form } = paramsAll;
   const id = record["id"];
   let res: any = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + `/paper/delete/${id}`,
+    'https://b968-148-251-210-181.ngrok.io' + `/paper/delete/${id}`,
     {
       method: "DELETE",
     }

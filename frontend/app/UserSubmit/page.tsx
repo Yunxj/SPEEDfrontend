@@ -7,10 +7,12 @@ type FieldType = {
   authors?: string;
   journalName?: string;
   yearOfPublication?: string;
+  SE?: string;
   volume?: string;
   number?: string;
   pages?: string;
   DOI?: string;
+  averageScore?: number;
 };
 type resType = {
   code: number;
@@ -40,7 +42,7 @@ export default function Home(props: any) {
       method = "PUT";
       values.id = dataId;
     }
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+    let res = await fetch('https://b968-148-251-210-181.ngrok.io' + url, {
       method: method,
       body: JSON.stringify(values),
       headers: {
@@ -103,6 +105,13 @@ export default function Home(props: any) {
               message: "Please input your year of publication!",
             },
           ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item<FieldType>
+          label="SE"
+          name="SE"
+          rules={[{ message: "Please input your SE!" }]}
         >
           <Input />
         </Form.Item>
