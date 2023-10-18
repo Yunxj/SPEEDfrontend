@@ -16,7 +16,7 @@ export const onFinishFailed = (errorInfo: any) => {
 export async function modifyRate(params: any) {
   const { id, rate, setFresh, fresh } = params;
   let data = { id, rate };
-  let res: any = await fetch('https://b968-148-251-210-181.ngrok.io' + `/paper/edit`, {
+  let res: any = await fetch(process.env.NEXT_PUBLIC_API_URL + `/paper/edit`, {
     method: "put",
     body: JSON.stringify(data),
     headers: {
@@ -36,7 +36,7 @@ export async function modifyRate(params: any) {
 export async function modifyApprove(params: any) {
   const { id, approval, setFresh, fresh, form } = params;
   let data = { id, approval };
-  let res: any = await fetch('https://b968-148-251-210-181.ngrok.io' + `/paper/edit`, {
+  let res: any = await fetch(process.env.NEXT_PUBLIC_API_URL + `/paper/edit`, {
     method: "put",
     body: JSON.stringify(data),
     headers: {
@@ -70,7 +70,7 @@ export async function deleteFunc(paramsAll: any) {
   const { record, setFresh, fresh, form } = paramsAll;
   const id = record["id"];
   let res: any = await fetch(
-    'https://b968-148-251-210-181.ngrok.io' + `/paper/delete/${id}`,
+    process.env.NEXT_PUBLIC_API_URL + `/paper/delete/${id}`,
     {
       method: "DELETE",
     }

@@ -46,7 +46,7 @@ export default function RootLayout({
         content: 'Please check required fields',
       });
     }
-    let res = await fetch('https://b968-148-251-210-181.ngrok.io' + "/user/add", {
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/user/add", {
       method: "POST",
       body: JSON.stringify({ name, password, role }),
       headers: {
@@ -92,7 +92,7 @@ export default function RootLayout({
     console.log("Success:", values);
     const { name, password, role } = values;
     let res: any = await fetch(
-      'https://b968-148-251-210-181.ngrok.io' +
+      process.env.NEXT_PUBLIC_API_URL +
         `/user/list?name=${name}&password=${password}&role=${role}`
     );
     res = await res.json();

@@ -215,7 +215,7 @@ export default function Home(props: any) {
       paramsStr = paramsStr.replace("&", "");
     }
     console.log(paramsStr)
-    let url = 'https://b968-148-251-210-181.ngrok.io' + `/paper/list`;
+    let url = process.env.NEXT_PUBLIC_API_URL + `/paper/list`;
     if (paramsStr) url = url + "?" + paramsStr;
     let res = await fetch(url, {
       cache: "no-store",

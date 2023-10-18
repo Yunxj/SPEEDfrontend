@@ -42,7 +42,7 @@ export default function Home(props: any) {
       method = "PUT";
       values.id = dataId;
     }
-    let res = await fetch('https://b968-148-251-210-181.ngrok.io' + url, {
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
       method: method,
       body: JSON.stringify(values),
       headers: {

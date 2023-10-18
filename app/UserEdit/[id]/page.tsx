@@ -12,7 +12,7 @@ export default function Home() {
     getPaperList(param.id);
   }, [param.id]);
   async function getPaperList(id: any) {
-    let url = 'https://b968-148-251-210-181.ngrok.io'+ `/paper/list?id=${id}`;
+    let url = process.env.NEXT_PUBLIC_API_URL + `/paper/list?id=${id}`;
     let res = await fetch(url, {
       cache: "no-store",
     });
