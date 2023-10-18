@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { approveMatch, averageScoreFunc } from "@/until/action";
 import { useRouter } from "next/navigation";
 import style from "./page.module.scss";
-
+import {baseUrl} from '../config'
 import { Button, Form, Input, message, Table, Select, Modal, Rate, DatePicker  } from "antd";
 import {
   onFinish,
@@ -215,7 +215,7 @@ export default function Home(props: any) {
       paramsStr = paramsStr.replace("&", "");
     }
     console.log(paramsStr)
-    let url = process.env.NEXT_PUBLIC_API_URL + `/paper/list`;
+    let url = baseUrl + `/paper/list`;
     if (paramsStr) url = url + "?" + paramsStr;
     let res = await fetch(url, {
       cache: "no-store",

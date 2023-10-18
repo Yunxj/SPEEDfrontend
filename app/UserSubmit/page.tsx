@@ -1,7 +1,7 @@
 "use client";
 import { Button, Form, Input, message } from "antd";
 import style from "./page.module.scss";
-
+import { baseUrl } from '../config'
 type FieldType = {
   title?: string;
   authors?: string;
@@ -42,7 +42,7 @@ export default function Home(props: any) {
       method = "PUT";
       values.id = dataId;
     }
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + url, {
+    let res = await fetch(baseUrl + url, {
       method: method,
       body: JSON.stringify(values),
       headers: {

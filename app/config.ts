@@ -1,0 +1,1 @@
+export const baseUrl = 'https://speedbackend-new.vercel.app'

@@ -7,12 +7,11 @@ import {
   MailOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-
+import {baseUrl} from './config'
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import { useState, useRef } from "react";
 import UserRoleContext from "@/store/user-role";
-
 type FieldType = {
   name?: string;
   password?: string;
@@ -46,7 +45,7 @@ export default function RootLayout({
         content: 'Please check required fields',
       });
     }
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/user/add", {
+    let res = await fetch(baseUrl + "/user/add", {
       method: "POST",
       body: JSON.stringify({ name, password, role }),
       headers: {
@@ -92,7 +91,7 @@ export default function RootLayout({
     console.log("Success:", values);
     const { name, password, role } = values;
     let res: any = await fetch(
-      process.env.NEXT_PUBLIC_API_URL +
+      baseUrl +
         `/user/list?name=${name}&password=${password}&role=${role}`
     );
     res = await res.json();
