@@ -6,6 +6,10 @@ export function approveMatch(style: number) {
       return "Approved";
     case 2:
       return "rejected";
+      case 3:
+    return "release";
+    default:
+      return " - ";
   }
 }
 export function averageScoreFunc(num: any, rate: any) {

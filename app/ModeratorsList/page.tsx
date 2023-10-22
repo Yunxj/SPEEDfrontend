@@ -21,13 +21,11 @@ import {
   onFinishFailed,
   approveFunc,
   rejectFunc,
-  releaseFunc,
   deleteFunc,
   modifyRate,
 } from "./until";
 
 import UserRoleContext from "@/store/user-role";
-import { UserType, PaperApproveType } from "../interfaces/types/common";
 
 type FieldType = {
   title?: string;
@@ -93,135 +91,111 @@ export default function Home(props: any) {
     setIsModalOpen(true);
   }
 
-  const columnsHandler = (role: any) => {
-    const columns = [
-      {
-        title: "title",
-        key: "title",
-        render: (text: any, record: any) => {
-          let showEdit = useCtx.roleData === "3" || useCtx.roleData === "2";
-          return (
-            <span className={style.actionBox}>
-              {showEdit && (
-                <a onClick={() => router.push("/UserEdit/" + record.id)}>
-                  {record.title}
-                </a>
-              )}
-              {!showEdit && <span>{record.title}</span>}
-            </span>
-          );
-        },
+  const columns = [
+    {
+      title: "title",
+      key: "title",
+      render: (text: any, record: any) => {
+        let showEdit = useCtx.roleData === "3" || useCtx.roleData === "2";
+        return (
+          <span className={style.actionBox}>
+            {showEdit && (
+              <a onClick={() => router.push("/UserEdit/" + record.id)}>
+                {record.title}
+              </a>
+            )}
+            {!showEdit && <span>{record.title}</span>}
+          </span>
+        );
       },
-      {
-        title: "authors",
-        dataIndex: "authors",
-        key: "authors",
-        sorter: (a: any, b: any) => a.authors - b.authors,
+    },
+    {
+      title: "authors",
+      dataIndex: "authors",
+      key: "authors",
+      sorter: (a: any, b: any) => a.authors - b.authors,
+    },
+    {
+      title: "journal name",
+      dataIndex: "journalName",
+      key: "journalName",
+      sorter: (a: any, b: any) => a.journalName - b.journalName,
+    },
+    {
+      title: "year of publication",
+      dataIndex: "yearOfPublication",
+      key: "yearOfPublication",
+      sorter: (a: any, b: any) => a.yearOfPublication - b.yearOfPublication,
+    },
+    {
+      title: "SE",
+      dataIndex: "SE",
+      key: "SE",
+      sorter: (a: any, b: any) => a.SE - b.SE,
+    },
+    {
+      title: "average score",
+      dataIndex: "averageScore",
+      key: "averageScore",
+      sorter: (a: any, b: any) => a.averageScore - b.averageScore,
+    },
+    {
+      title: "volume",
+      dataIndex: "volume",
+      key: "volume",
+      sorter: (a: any, b: any) => a.volume - b.volume,
+    },
+    {
+      title: "number",
+      dataIndex: "number",
+      key: "number",
+      sorter: (a: any, b: any) => a.number - b.number,
+    },
+    {
+      title: "pages",
+      dataIndex: "pages",
+      key: "pages",
+      sorter: (a: any, b: any) => a.pages - b.pages,
+    },
+    {
+      title: "DOI",
+      dataIndex: "DOI",
+      key: "DOI",
+      sorter: (a: any, b: any) => a.DOI - b.DOI,
+    },
+    {
+      title: "approval",
+      dataIndex: "approval",
+      key: "approval",
+      sorter: (a: any, b: any) => a.approval - b.approval,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (text: any, record: any) => {
+        const params = { record, setFresh, fresh, form };
+        let showDelete = useCtx.roleData === "3";
+        let showReview = useCtx.roleData === "3" || useCtx.roleData === "1";
+        let showEdit = useCtx.roleData === "3" || useCtx.roleData === "2";
+        return (
+          <span className={style.actionBox}>
+            <a onClick={() => rateFunc(params)}>rate</a>
+            {showReview && (
+              <>
+                <a onClick={() => approveFunc(params)}>approve</a>
+                <a onClick={() => rejectFunc(params)}>reject</a>
+              </>
+            )}
+            {showEdit && (
+              <a onClick={() => router.push("/UserEdit/" + record.id)}>edit</a>
+            )}
+            {showDelete && <a onClick={() => deleteFunc(params)}>delete</a>}
+          </span>
+        );
       },
-      {
-        title: "journal name",
-        dataIndex: "journalName",
-        key: "journalName",
-        sorter: (a: any, b: any) => a.journalName - b.journalName,
-      },
-      {
-        title: "year of publication",
-        dataIndex: "yearOfPublication",
-        key: "yearOfPublication",
-        sorter: (a: any, b: any) => a.yearOfPublication - b.yearOfPublication,
-      },
-      {
-        title: "SE",
-        dataIndex: "SE",
-        key: "SE",
-        sorter: (a: any, b: any) => a.SE - b.SE,
-      },
-      {
-        title: "average score",
-        dataIndex: "averageScore",
-        key: "averageScore",
-        sorter: (a: any, b: any) => a.averageScore - b.averageScore,
-      },
-      {
-        title: "volume",
-        dataIndex: "volume",
-        key: "volume",
-        sorter: (a: any, b: any) => a.volume - b.volume,
-      },
-      {
-        title: "number",
-        dataIndex: "number",
-        key: "number",
-        sorter: (a: any, b: any) => a.number - b.number,
-      },
-      {
-        title: "pages",
-        dataIndex: "pages",
-        key: "pages",
-        sorter: (a: any, b: any) => a.pages - b.pages,
-      },
-      {
-        title: "DOI",
-        dataIndex: "DOI",
-        key: "DOI",
-        sorter: (a: any, b: any) => a.DOI - b.DOI,
-      },
-      {
-        title: "Action",
-        key: "action",
-        render: (text: any, record: any) => {
-          const params = { record, setFresh, fresh, form };
+    },
+  ];
 
-          /** edit (general  moderators analysts admin) */
-          let showEdit =
-            useCtx.roleData === UserType.general ||
-            useCtx.roleData === UserType.moderators ||
-            useCtx.roleData === UserType.analysts ||
-            useCtx.roleData === UserType.admin;
-          /** approve (moderators) */
-          let showApprove =
-            useCtx.roleData === UserType.moderators ||
-            useCtx.roleData === UserType.admin;
-          /** release (admin analysts) */
-          let showRelease =
-            useCtx.roleData === UserType.analysts ||
-            useCtx.roleData === UserType.admin;
-          /** delete (admin) */
-          let showDelete = useCtx.roleData === UserType.admin;
-
-          return (
-            <span className={style.actionBox}>
-              <a onClick={() => rateFunc(params)}>rate</a>
-              {showEdit && (
-                <a onClick={() => router.push("/UserEdit/" + record.id)}>
-                  edit
-                </a>
-              )}
-              {showApprove && (
-                <>
-                  <a onClick={() => approveFunc(params)}>approve</a>
-                  <a onClick={() => rejectFunc(params)}>reject</a>
-                </>
-              )}
-              {showRelease && (
-                <a onClick={() => releaseFunc(params)}>release</a>
-              )}
-              {showDelete && <a onClick={() => deleteFunc(params)}>delete</a>}
-            </span>
-          );
-        },
-      },
-    ];
-    if (role && role !== UserType.general) {
-      columns.splice(columns.length - 1, 0, {
-        title: "approval",
-        dataIndex: "approval",
-        key: "approval",
-        sorter: (a: any, b: any) => a.approval - b.approval,
-      });
-    }
-    return columns;
-  };
   // if (isAll) {
   //   columns.pop();
   // }
@@ -236,19 +210,21 @@ export default function Home(props: any) {
 
   async function getPaperList(params: any) {
     let paramsStr = "";
-    if (params.approval === "all") {
-      delete params.approval;
-    }
-    // let searchForm: any = {};
-    for (let key in params) {
-      if (params[key]) {
-        // searchForm[key] = params[key];
-        paramsStr = paramsStr + "&" + key + "=" + params[key];
-        localStorage.setItem(key, params[key]);
+    if (params !== "all") {
+      if (params.approval === "all") {
+        delete params.approval;
       }
+      // let searchForm: any = {};
+      for (let key in params) {
+        if (params[key]) {
+          // searchForm[key] = params[key];
+          paramsStr = paramsStr + "&" + key + "=" + params[key];
+          localStorage.setItem(key, params[key]);
+        }
+      }
+      // setSearchForm({ ...searchForm });
+      paramsStr = paramsStr.replace("&", "");
     }
-    // setSearchForm({ ...searchForm });
-    paramsStr = paramsStr.replace("&", "");
     console.log(paramsStr);
     let url = baseUrl + `/paper/list`;
     if (paramsStr) url = url + "?" + paramsStr;
@@ -287,20 +263,20 @@ export default function Home(props: any) {
 
     setPaperList(list);
   }
-
-  function initSearchForm(data: any) {
+  function initSearchForm() {
     let params: any = {};
     for (let key in initialValues) {
       form.setFieldValue(key, localStorage.getItem(key));
       params[key] = localStorage.getItem(key);
     }
-    getPaperList({ ...params, ...data });
+    getPaperList(params);
   }
-
   useEffect(() => {
-    initSearchForm({ role: useCtx?.roleData });
-  }, [fresh, useCtx?.roleData]);
-
+    getPaperList("all");
+  }, [fresh]);
+  useEffect(() => {
+    initSearchForm();
+  }, []);
   return (
     <main>
       <Form
@@ -395,7 +371,7 @@ export default function Home(props: any) {
         </Form.Item>
       </Form>
       <Table
-        columns={columnsHandler(useCtx.roleData)}
+        columns={columns}
         dataSource={paperList}
         rowKey={(record: any) => record.id}
         pagination={false}

@@ -1,7 +1,5 @@
 import { Button, Form, Input, message, Table } from "antd";
 import {baseUrl} from '../config'
-import { PaperApproveType } from "../interfaces/types/common";
-
 export const onFinish = async (values: any, getPaperList: any) => {
   console.log("Success:", values);
   if (values.yearOfPublicationRange) {
@@ -66,12 +64,6 @@ export async function approveFunc(paramsAll: any) {
 export async function rejectFunc(paramsAll: any) {
   const { record, setFresh, fresh, form } = paramsAll;
   const params = { id: record["id"], approval: 2, setFresh, fresh, form };
-  await modifyApprove(params);
-}
-
-export async function releaseFunc(paramsAll: any) {
-  const { record, setFresh, fresh, form } = paramsAll;
-  const params = { id: record["id"], approval: PaperApproveType.Release, setFresh, fresh, form };
   await modifyApprove(params);
 }
 

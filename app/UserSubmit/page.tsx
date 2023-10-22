@@ -1,7 +1,8 @@
 "use client";
 import { Button, Form, Input, message } from "antd";
+import { useRouter } from "next/navigation";
 import style from "./page.module.scss";
-import { baseUrl } from '../config'
+import { baseUrl } from "../config";
 type FieldType = {
   title?: string;
   authors?: string;
@@ -20,6 +21,7 @@ type resType = {
 };
 
 export default function Home(props: any) {
+  const router = useRouter();
   const { sourceData } = props;
   const [form] = Form.useForm();
   let dataId: any;
@@ -163,6 +165,14 @@ export default function Home(props: any) {
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
           <Button type="primary" htmlType="submit">
             Submit
+          </Button>
+          <Button
+            className="ml-5"
+            onClick={() => {
+              router.push("/");
+            }}
+          >
+            Cancel
           </Button>
         </Form.Item>
       </Form>

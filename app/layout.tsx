@@ -1,17 +1,21 @@
 "use client";
 import "./globals.css";
 import { useRouter } from "next/navigation";
-import { Button, Form, Input, message, Modal, Select } from "antd";
+import { Button, Form, Input, message, Modal, Select, Layout } from "antd";
 import {
   AppstoreOutlined,
   MailOutlined,
   SettingOutlined,
+  UserOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
-import {baseUrl} from './config'
+import { baseUrl } from "./config";
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import UserRoleContext from "@/store/user-role";
+import { UserType } from "./interfaces/types/common";
+
 type FieldType = {
   name?: string;
   password?: string;
@@ -32,75 +36,120 @@ export default function RootLayout({
   const [current, setCurrent] = useState("AllData");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roleData, setRoleData] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
+
+  const [loginRes, setLoginRes] = useState({} as any);
 
   const [form] = Form.useForm();
 
   async function registerFunc() {
     let name = form.getFieldValue("name");
     let password = form.getFieldValue("password");
-    let role = form.getFieldValue("role");
-    if (!name || !password || !role) {
+    if (!name || !password) {
       return Modal.warning({
-        title: 'warning',
-        content: 'Please check required fields',
+        title: "warning",
+        content: "Please check required fields",
       });
     }
-    let res = await fetch(baseUrl + "/user/add", {
-      method: "POST",
-      body: JSON.stringify({ name, password, role }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    let dealRes: resType = await res.json();
-    console.log("res2", dealRes);
-    if (dealRes.code === 1) {
-      setRoleData(dealRes.data);
-      setIsModalOpen(false);
-      message.success(dealRes.message);
-    } else {
-      message.error(dealRes.message);
+    setRegisterLoading(true);
+    try {
+      let res = await fetch(baseUrl + "/user/add", {
+        method: "POST",
+        body: JSON.stringify({ name, password, role: UserType.general }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      let dealRes: resType = await res.json();
+      if (dealRes.code === 1) {
+        setRoleData(UserType.general);
+        setIsModalOpen(false);
+        message.success(dealRes.message);
+      } else {
+        message.error(dealRes.message);
+      }
+      setRegisterLoading(false);
+    } catch (error: any) {
+      message.error(error.message);
+      setRegisterLoading(false);
     }
   }
 
-  const items: MenuProps["items"] = [
-    {
-      label: "paper list",
-      key: "AllData",
-      icon: <MailOutlined />,
-    },
-    {
-      label: "add paper",
-      key: "UserSubmit",
-      icon: <AppstoreOutlined />,
-    },
-    {
-      label: "review paper",
-      key: "ModeratorReview",
-      icon: <SettingOutlined />,
-      disabled: roleData === "",
-    },
-    {
-      label: roleData === "" ? "login" : "logout",
-      key: "login",
-      icon: <AppstoreOutlined />,
-    },
-  ];
-
+  const menuHanlder = (level: any) => {
+    const items: MenuProps["items"] = [
+      {
+        label: "paper list",
+        key: "AllData",
+        icon: <MailOutlined />,
+      },
+      {
+        label: "add paper",
+        key: "UserSubmit",
+        icon: <AppstoreOutlined />,
+      },
+      {
+        label: "review paper",
+        key: "ModeratorReview",
+        icon: <SettingOutlined />,
+        disabled: roleData === "",
+      },
+      {
+        label:
+          roleData === "" ? (
+            "login"
+          ) : (
+            <>
+              logout
+              <span style={{ marginLeft: "20px" }}>
+                {loginRes?.code === 1 && loginRes?.name ? loginRes?.name : ""}
+              </span>
+            </>
+          ),
+        key: "login",
+        icon: <AppstoreOutlined />,
+      },
+    ];
+    // if (level === UserType.moderators || level === UserType.analysts) {
+    //   items.splice(1, 0, {
+    //     label: `${
+    //       level === UserType.moderators ? "moderators" : "analysts"
+    //     } list`,
+    //     key: `ModeratorsList`,
+    //     // key: `${level === UserType.moderators ? "Moderators" : "Analysts"}List`,
+    //     icon: <CreditCardOutlined />,
+    //   });
+    // }
+    if (level === UserType.admin) {
+      items.push({
+        label: "user list",
+        key: "UserManagementList",
+        icon: <UserOutlined />,
+      });
+    }
+    return items;
+  };
   const onFinish = async (values: any) => {
     console.log("Success:", values);
-    const { name, password, role } = values;
-    let res: any = await fetch(
-      baseUrl +
-        `/user/list?name=${name}&password=${password}&role=${role}`
-    );
-    res = await res.json();
-    if (res.code === 1) {
-      message.success(res.message);
-      setRoleData(res.data);
-      setIsModalOpen(false);
-    } else {
-      message.error(res.message);
+    const { name, password } = values;
+    setLoginLoading(true);
+    try {
+      let res: any = await fetch(
+        baseUrl + `/user/list?name=${name}&password=${password}`
+      );
+      res = await res.json();
+      if (res.code === 1) {
+        message.success(res.message);
+        setLoginRes({ ...res, name });
+        setRoleData(res?.data?.role);
+        setIsModalOpen(false);
+      } else {
+        message.error(res.message);
+      }
+      setLoginLoading(false);
+    } catch (error: any) {
+      message.error(error.message);
+      setLoginLoading(false);
     }
   };
 
@@ -110,11 +159,12 @@ export default function RootLayout({
 
   const router = useRouter();
   const onClick: MenuProps["onClick"] = (e) => {
-    console.log("click ", e);
     setCurrent(e.key);
     if (e.key === "login") {
       if (roleData) {
         setRoleData("");
+        setLoginRes({});
+        router.push("/");
         return;
       }
       setIsModalOpen(true);
@@ -125,18 +175,33 @@ export default function RootLayout({
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setRegisterLoading(false);
+    setLoginLoading(false);
   };
+
   return (
     <html lang="en">
       <body>
         <UserRoleContext.Provider value={{ roleData: roleData }}>
-          <Menu
-            className="flex justify-center items-center"
-            onClick={onClick}
-            selectedKeys={[current]}
-            mode="horizontal"
-            items={items}
-          />
+          <div className="flex">
+            <div
+              className="flex justify-center items-center"
+              style={{
+                width: "100px",
+                borderRadius: "10px",
+                backgroundImage: `url(https://pic.rmb.bdstatic.com/bjh/2ef3241d6a72cee184f2269022963e12.png)`,
+                backgroundSize: "100%",
+              }}
+            ></div>
+            <Menu
+              className="flex justify-center items-center"
+              style={{ flex: 1 }}
+              onClick={onClick}
+              selectedKeys={[current]}
+              mode="horizontal"
+              items={menuHanlder(loginRes?.data?.role)}
+            />
+          </div>
           {children}
           <Modal
             title="login"
@@ -172,7 +237,7 @@ export default function RootLayout({
               >
                 <Input />
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 label="role"
                 name="role"
                 rules={[
@@ -187,13 +252,17 @@ export default function RootLayout({
                   <Select.Option value="2">analysts</Select.Option>
                   <Select.Option value="3">admin</Select.Option>
                 </Select>
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" loading={loginLoading} htmlType="submit">
                   login
                 </Button>
-                <Button className="ml-5" onClick={registerFunc}>
+                <Button
+                  className="ml-5"
+                  loading={registerLoading}
+                  onClick={registerFunc}
+                >
                   register
                 </Button>
               </Form.Item>
