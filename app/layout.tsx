@@ -193,7 +193,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <UserRoleContext.Provider value={{ roleData: roleData }}>
+        <UserRoleContext.Provider value={{ roleData: roleData, ...loginRes }}>
           <div className="flex">
             <div
               className="flex justify-center items-center"

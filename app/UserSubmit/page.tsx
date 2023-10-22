@@ -1,8 +1,11 @@
 "use client";
 import { Button, Form, Input, message } from "antd";
+import { useContext } from "react";
 import { useRouter } from "next/navigation";
 import style from "./page.module.scss";
 import { baseUrl } from "../config";
+import UserRoleContext from "@/store/user-role";
+
 type FieldType = {
   title?: string;
   authors?: string;
@@ -22,6 +25,7 @@ type resType = {
 
 export default function Home(props: any) {
   const router = useRouter();
+  const useCtx = useContext(UserRoleContext);
   const { sourceData } = props;
   const [form] = Form.useForm();
   let dataId: any;
@@ -44,6 +48,7 @@ export default function Home(props: any) {
       method = "PUT";
       values.id = dataId;
     }
+    values.userId = useCtx?.data?.id || "";
     let res = await fetch(baseUrl + url, {
       method: method,
       body: JSON.stringify(values),

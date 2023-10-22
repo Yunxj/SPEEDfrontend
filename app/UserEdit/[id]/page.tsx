@@ -3,7 +3,7 @@ import UserSubmit from "@/app/UserSubmit/page";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Form, Input, message, Table } from "antd";
-import {baseUrl} from '../../config'
+import { baseUrl } from "../../config";
 export default function Home() {
   const param = useParams();
   const [sourceData, setSourceData] = useState();
@@ -12,7 +12,7 @@ export default function Home() {
     getPaperList(param.id);
   }, [param.id]);
   async function getPaperList(id: any) {
-    let url = baseUrl + `/paper/list?id=${id}`;
+    let url = baseUrl + `/paper/list?id=${id}&search=1`;
     let res = await fetch(url, {
       cache: "no-store",
     });

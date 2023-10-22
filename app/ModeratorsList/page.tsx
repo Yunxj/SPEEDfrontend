@@ -263,26 +263,32 @@ export default function Home(props: any) {
 
     setPaperList(list);
   }
-  function initSearchForm() {
+  function initSearchForm(data: any) {
     let params: any = {};
     for (let key in initialValues) {
       form.setFieldValue(key, localStorage.getItem(key));
       params[key] = localStorage.getItem(key);
     }
-    getPaperList(params);
+    getPaperList({ ...params, ...data });
   }
+
   useEffect(() => {
-    getPaperList("all");
-  }, [fresh]);
-  useEffect(() => {
-    initSearchForm();
-  }, []);
+    initSearchForm({ role: useCtx?.roleData, userId: useCtx?.data?.id || "" });
+  }, [fresh, useCtx?.roleData]);
+
   return (
     <main>
       <Form
         name="basic"
         onFinish={(values) =>
-          onFinish({ ...values, role: useCtx.roleData || "" }, getPaperList)
+          onFinish(
+            {
+              ...values,
+              role: useCtx.roleData || "",
+              userId: useCtx?.data?.id || "",
+            },
+            getPaperList
+          )
         }
         onFinishFailed={onFinishFailed}
         autoComplete="off"

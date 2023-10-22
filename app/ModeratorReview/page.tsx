@@ -78,6 +78,7 @@ export default function Home(props: any) {
       sortBy: sorter.field,
       order: sorter.order,
       role: useCtx.roleData || "",
+      userId: useCtx?.data?.id || "",
     });
   };
 
@@ -298,7 +299,7 @@ export default function Home(props: any) {
   }
 
   useEffect(() => {
-    initSearchForm({ role: useCtx?.roleData });
+    initSearchForm({ role: useCtx?.roleData, userId: useCtx?.data?.id || "" });
   }, [fresh, useCtx?.roleData]);
 
   return (
@@ -306,7 +307,14 @@ export default function Home(props: any) {
       <Form
         name="basic"
         onFinish={(values) =>
-          onFinish({ ...values, role: useCtx.roleData || "" }, getPaperList)
+          onFinish(
+            {
+              ...values,
+              role: useCtx.roleData || "",
+              userId: useCtx?.data?.id || "",
+            },
+            getPaperList
+          )
         }
         onFinishFailed={onFinishFailed}
         autoComplete="off"
