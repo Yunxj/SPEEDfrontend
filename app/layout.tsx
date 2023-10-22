@@ -42,7 +42,9 @@ export default function RootLayout({
   const [loginRes, setLoginRes] = useState({} as any);
 
   const [form] = Form.useForm();
-
+  const divStyle = {
+    backgroundImage: "url(/logo-pic.jpg)",
+  };
   async function registerFunc() {
     let name = form.getFieldValue("name");
     let password = form.getFieldValue("password");
@@ -83,11 +85,11 @@ export default function RootLayout({
         key: "AllData",
         icon: <MailOutlined />,
       },
-      {
-        label: "add paper",
-        key: "UserSubmit",
-        icon: <AppstoreOutlined />,
-      },
+      // {
+      //   label: "add paper",
+      //   key: "UserSubmit",
+      //   icon: <AppstoreOutlined />,
+      // },
       {
         label: "review paper",
         key: "ModeratorReview",
@@ -120,6 +122,15 @@ export default function RootLayout({
     //     icon: <CreditCardOutlined />,
     //   });
     // }
+
+    if (level === UserType.general) {
+      items.splice(1, 0, {
+        label: "add paper",
+        key: "UserSubmit",
+        icon: <AppstoreOutlined />,
+      });
+    }
+
     if (level === UserType.admin) {
       items.push({
         label: "user list",
@@ -189,8 +200,8 @@ export default function RootLayout({
               style={{
                 width: "100px",
                 borderRadius: "10px",
-                backgroundImage: `url(https://pic.rmb.bdstatic.com/bjh/2ef3241d6a72cee184f2269022963e12.png)`,
                 backgroundSize: "100%",
+                ...divStyle,
               }}
             ></div>
             <Menu

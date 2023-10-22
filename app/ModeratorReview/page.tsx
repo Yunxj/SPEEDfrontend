@@ -172,11 +172,9 @@ export default function Home(props: any) {
         render: (text: any, record: any) => {
           const params = { record, setFresh, fresh, form };
 
-          /** edit (general  moderators analysts admin) */
+          /** edit (general admin) */
           let showEdit =
             useCtx.roleData === UserType.general ||
-            useCtx.roleData === UserType.moderators ||
-            useCtx.roleData === UserType.analysts ||
             useCtx.roleData === UserType.admin;
           /** approve (moderators) */
           let showApprove =
