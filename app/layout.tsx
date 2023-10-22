@@ -123,7 +123,7 @@ export default function RootLayout({
     //   });
     // }
 
-    if (level === UserType.general) {
+    if (!!level) {
       items.splice(1, 0, {
         label: "add paper",
         key: "UserSubmit",
